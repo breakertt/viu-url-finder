@@ -119,6 +119,11 @@ def episode(id="", proxy=None):
 
     epData = json.loads(epApi.text)
 
+    print(epData)
+    
+    if not 'series' in epData['data']:
+        return {}
+    
     seriesName = epData['data']['series']['name']
     epData = epData['data']['series']['product']
 
@@ -127,10 +132,10 @@ def episode(id="", proxy=None):
         product_id = epData[i]['product_id']
         number = epData[i]['number']
         link = "https://downsub.com/?url=" + "https://www.viu.com/ott/hk/zh-hk/vod/" + product_id + "/"
-        epData_new[number] = [{
+        epData_new[number] = {
             'number' : number,
             'link' : link,
-        }]
+        }
     
     epData_new['name'] = seriesName
 

@@ -37,23 +37,27 @@ def gen_markup_series(seriresData):
 
 def episodeHandler(chat_id,episode_id):
     epData = viu_info.episode(episode_id,proxy)
-    if len(list(epData)) == 1:
+    epDataList = list(epData)
+    if len(list(epData)) <= 1:
         bot.send_message(chat_id, "暂无结果")
     else:
-        bot.send_message(chat_id, "番剧:" + epData['name'] + " 请选择集数:", reply_markup=gen_markup_eps(epData))
+        bot.send_message(chat_id, "番剧:" + epData['name'] + " 请选择集数:", reply_markup=gen_markup_eps(epData,epDataList))
 
-def gen_markup_eps(epData):
+def gen_markup_eps(epData,epDataList):
     markup = InlineKeyboardMarkup()
     count = 0
     list = []
-    for key, value in epData.items():
+    epDataList.reverse()
+    for i in range(len(epDataList)):
+        key = epDataList[i]
+        value = epData[epDataList[i]]
         if key != 'name':
             callback_data_json = {
-                "number" : value[0]['number'],
+                "number" : value['number'],
                 "type": 2
             }
             callback_data = json.dumps(callback_data_json)
-            list.append(InlineKeyboardButton(text=callback_data_json["number"], url=value[0]["link"], callback_data=callback_data))
+            list.append(InlineKeyboardButton(text=callback_data_json["number"], url=value["link"],callback_data=callback_data))
 
             if (count % 5 == 4):
                 markup.row(*list)
@@ -70,11 +74,12 @@ def send_welcome(message):
 
 @bot.message_handler(commands=['series'])
 def message_handler(message):
+    print(message.text)
     message_list = message.text.split()
     if len(message_list) == 1:
         bot.reply_to(message, "使用方法: /series <番剧名>")
     else:
-        seriresData = viu_info.search(message.text[8:len(message.text)],proxy)
+        seriresData = viu_info.search(message.text[len(message_list[0])+1:len(message.text)],proxy)
         if len(seriresData) == 0:
             bot.reply_to(message, "无相关番剧")
         else:
